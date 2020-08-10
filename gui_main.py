@@ -1,3 +1,5 @@
+import copy
+
 import PySide2
 import yaml
 from Link import Link
@@ -5,9 +7,9 @@ from Link import Link
 from ui_elements.table import Table_widget
 from ui_elements.scheme import Scheme
 
-import events
-from base_class import Observer, State, Pxi2568, Pxi2569, Port, Kbk, Pxi6509, Fasade, Base, AddLink, SelectSignal, \
-    RemLink, SelectLink
+from events import RemLink, SelectLink, AddLink, SelectSignal
+from base_class import Observer, State, Pxi2568, Pxi2569, Port, Kbk, Pxi6509, Fasade, Base
+
 import sys
 from PySide2.QtCore import Qt, Slot
 from PySide2.QtGui import QPainter, QColor, QStandardItemModel
@@ -166,7 +168,7 @@ class Widget(QWidget, Observer):
     def update2(self, state: State):
         self.fill_table(state)
         self.fill_list(state)
-        self.currentState = state
+        self.currentState = copy.deepcopy(state)
         self.set_completers()
         if self.window != None:
             self.window.view.add_links(self.currentState.current_links)
@@ -259,31 +261,32 @@ class Widget(QWidget, Observer):
         QApplication.quit()
 
     def fill_table(self, state: State):
+        if self.currentState.current_links!=state.current_links:
+        # if False:
+            self.table.blockSignals(True)
+            self.items_in_table = 0
+            self.table.setRowCount(0)
+            self.table.clear()
+            self.table.setHorizontalHeaderLabels(["Кл1", "Кл2", "Сигнал"])
+            for link in state.current_links:
 
-        self.table.blockSignals(True)
-        self.items_in_table = 0
-        self.table.setRowCount(0)
-        self.table.clear()
-        self.table.setHorizontalHeaderLabels(["Кл1", "Кл2", "Сигнал"])
-        for link in state.current_links:
+                node1item = QTableWidgetItem(link.node1)
+                node2item = QTableWidgetItem(link.node2)
+                signalitem = QTableWidgetItem(link.signal)
+                self.table.insertRow(self.items_in_table)
+                self.table.setItem(self.items_in_table, 0, node1item)
+                self.table.item(self.items_in_table, 0).setBackgroundColor(
+                    QColor("light green"))
+                self.table.setItem(self.items_in_table, 1, node2item)
+                self.table.item(self.items_in_table, 1).setBackgroundColor(
+                    QColor("light green"))
+                self.table.setItem(self.items_in_table, 2, signalitem)
+                self.table.item(self.items_in_table, 2).setBackgroundColor(QColor("yellow"))
+                if self.items_in_table in state.selected_links:
+                    self.table.selectRow(self.items_in_table)
 
-            node1item = QTableWidgetItem(link.node1)
-            node2item = QTableWidgetItem(link.node2)
-            signalitem = QTableWidgetItem(link.signal)
-            self.table.insertRow(self.items_in_table)
-            self.table.setItem(self.items_in_table, 0, node1item)
-            self.table.item(self.items_in_table, 0).setBackgroundColor(
-                QColor("light green"))
-            self.table.setItem(self.items_in_table, 1, node2item)
-            self.table.item(self.items_in_table, 1).setBackgroundColor(
-                QColor("light green"))
-            self.table.setItem(self.items_in_table, 2, signalitem)
-            self.table.item(self.items_in_table, 2).setBackgroundColor(QColor("yellow"))
-            if self.items_in_table in state.selected_links:
-                self.table.selectRow(self.items_in_table)
-
-            self.items_in_table += 1
-        self.table.blockSignals(False)
+                self.items_in_table += 1
+            self.table.blockSignals(False)
 
     @Slot()
     def clear_table(self):

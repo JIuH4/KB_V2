@@ -3,6 +3,8 @@ import sys
 import enum
 from kb_nodes import KBK
 from typing import List
+from ui_elements.graph_items.kb_base import Kb_base
+from ui_elements.graph_items.node import Node, NodeState
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import QPoint, Qt, QSize, QRect
 from PySide2.QtGui import QPainter, QFont, QColor, QPen
@@ -11,12 +13,6 @@ from PySide2.QtWidgets import (QApplication, QHBoxLayout,
 from PySide2.QtSvg import *
 
 from Link import Link, DLink
-
-
-class NodeState(enum.Enum):
-    normal = 0
-    used = 1
-    highlight = 2
 
 
 class LinkState(enum.Enum):
@@ -28,14 +24,9 @@ class LinkState(enum.Enum):
 class Scheme(QWidget):
     def __init__(self):
         super().__init__()
-
         self.layt = QHBoxLayout()
-        # btn = QPushButton("Sdasd")
-        # btn.clicked.connect(self.clc)
-        # self.layt.addWidget(btn)
         self.view = GraphWidget()
         self.layt.addWidget(self.view)
-
         self.setWindowTitle("Схема")
         self.setLayout(self.layt)
 
@@ -50,22 +41,14 @@ class Scheme(QWidget):
             if modifiers == QtCore.Qt.ControlModifier:
                 if numSteps > 0:
                     self.view.scale(1.05, 1.05)
-                    # self.view.fitInView(0.95,0.95,Qt.KeepAspectRatio)
                 if numSteps < 0:
                     self.view.scale(0.95, 0.95)
-            # newHeight = self.geometry().height() - event.delta()
-            # width = self.geometry().width() - event.delta()
-            # self.resize(width, newHeight)
         event.accept()
 
     def clc(self):
-        # self.view.links[-1].state=LinkState.highlight
         self.view.terminals[2].state = NodeState.highlight
-
         print(self.view.terminals[2].num)
         print(self.view.terminals[2].name)
-        # self.view.scene.removeItem(self.view.links[-1])
-        # self.view.clear_links()
         self.view.highlight_links([Link("C 1", "M 100")])
         self.view.refresh()
 
@@ -115,79 +98,52 @@ class Edge(QtWidgets.QGraphicsItem):
         painter.drawLine(line)
 
 
-class Node(QGraphicsItem):
-    Type = QGraphicsItem.UserType + 1
+class Kbk(Kb_base):
+    Type = QtWidgets.QGraphicsItem.UserType + 4
 
-    def __init__(self, graphWidget, num, name: str, size=22):
-        QGraphicsItem.__init__(self)
-        self.state = NodeState.normal
-        self.size = size
+    def __init__(self, name: str, base_y=-100, base_x=-100, size_x=1450, size_y=500, ):
+        Kb_base.__init__(self)
+        self.size_x = size_x
+        self.size_y = size_y
+        self.base_x = base_x
+        self.base_y = base_y
         self.name = name
-        if isinstance(num, str):
-            self.numstr = num
-            self.num = 9999
-        elif isinstance(num, int):
-            self.numstr = str(num)
-            self.num = num
-
-        # self.num = num
-        if self.numstr[:2] == "GN" or self.numstr == "+5":
-            self.tag = self.numstr
-        else:
-            self.tag = name + " " + self.numstr
-        self.color = QColor('light green')
-
         self.setFlag(QGraphicsItem.ItemIsMovable)
-        # self.setFlag(QGraphicsItem.ItemIsSelectable)
-        # self.setCacheMode(self.DeviceCoordinateCache)
-        self.setZValue(-1)
+        self.setCacheMode(self.DeviceCoordinateCache)
+        for m in self.terminals:
+            print(m.pos())
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print(self.numstr)
+        print("1")
+
+    def upd(self, event: QGraphicsSceneMouseEvent):
+        print(event.scenePos())
 
     def type(self):
-        return Node.Type
+        return Kbk.Type
 
     def boundingRect(self):
-
-        return QtCore.QRectF((self.size // 2) * -1, (self.size // 2) * -1, self.size, self.size)
+        return QtCore.QRectF((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
 
     def paint(self, painter, option, widget):
-        if self.state == NodeState.normal:
-            self.color = QColor('light green')
-        elif self.state == NodeState.used:
-            self.color = QColor('yellow')
-        elif self.state == NodeState.highlight:
-            self.color = QColor('cyan')
-        painter.setPen(QColor("black"))
-        painter.setBrush(self.color)
-        painter.drawRect((self.size // 2) * -1, (self.size // 2) * -1, self.size, self.size)
-
-        painter.setPen(QColor("black"))
-        painter.setFont(QFont('Verdana', 7))
-
-        if self.num == 9999:
-            if len(self.numstr) >= 4:
-                textpoint = QPoint(-12, 3)
-            elif len(self.numstr) >= 3:
-                textpoint = QPoint(-8, 3)
-            else:
-                textpoint = QPoint(-4, 3)
-            if self.numstr == "GND":
-                textpoint = QPoint(-12, 3)
-            if self.numstr == "+5":
-                textpoint = QPoint(-8, 3)
-        else:
-
-            if self.num >= 100:
-                textpoint = QPoint(-11, 3)
-            elif self.num >= 10:
-                textpoint = QPoint(-7, 3)
-            else:
-                textpoint = QPoint(-3, 3)
-        # if self.numstr=="GND":
-        # print(f"{textpoint.x()} {textpoint.y()}")
-        painter.drawText(textpoint, self.numstr)
+        self.terminal_print_face_down(painter, -596, 210, 50, "M", start_number=0, shift=25)
+        self.terminal_print_face_down(painter, 22, 210, 50, "M", start_number=25, shift=25)
+        self.terminal_print_face_down(painter, -596, 110, 50, "M", start_number=100, shift=27)
+        self.terminal_print_face_down(painter, 22, 110, 54, "M", start_number=125, shift=25)
+        self.terminal_print_one_line(painter, -596, -2, 25, "MB2")
+        self.terminal_print_one_line(painter, -596, 22, 25, "MB1")
+        self.terminal_print_one_line(painter, 22, -2, 25, "MB4", tag_direction=1)
+        self.terminal_print_one_line(painter, 22, 22, 25, "MB3", tag_direction=1)
+        self.terminal_print_face_up(painter, -596, -112, 50, "BA2")
+        self.terminal_print_face_up(painter, -596, -212, 50, "BA1")
+        self.terminal_print_face_up(painter, 22, -112, 50, "BA4")
+        self.terminal_print_face_up(painter, 22, -212, 50, "BA3")
+        self.terminal_print_face_up(painter, 638, -112, 8, "K")
+        self.terminal_print_face_up(painter, -709, -112, 8, "K", start_number=8)
+        # self.print_greed(painter)
+        painter.drawRect((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
+        for m in self.terminals:
+            print(m.name)
 
 
 class GraphWidget(QGraphicsView):
@@ -208,33 +164,7 @@ class GraphWidget(QGraphicsView):
         self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
         self.setBackgroundBrush(QColor("lightgray"))
 
-        self.terminal_print_face_down(-618, 200, 50, "M", start_number=0, shift=25)
-        self.terminal_print_face_down(40, 200, 50, "M", start_number=25, shift=25)
-        self.terminal_print_face_down(-618, 100, 50, "M", start_number=100, shift=27)
-        self.terminal_print_face_down(40, 100, 54, "M", start_number=125, shift=25)
-        self.terminal_print_one_line(-618, -12, 25, "MB2")
-        self.terminal_print_one_line(-618, 12, 25, "MB1")
-        self.terminal_print_one_line(40, -12, 25, "MB4", tag_direction=1)
-        self.terminal_print_one_line(40, 12, 25, "MB3", tag_direction=1)
-        self.terminal_print_face_up(-618, -124, 50, "BA2")
-        self.terminal_print_face_up(-618, -224, 50, "BA1")
-        self.terminal_print_face_up(40, -124, 50, "BA4")
-        self.terminal_print_face_up(40, -224, 50, "BA3")
-        self.terminal_print_face_up(680, -124, 8, "K")
-        self.terminal_print_face_up(-758, -124, 8, "K", start_number=8)
-        self.terminal_print_face_down(-590, 300, 100, "CH")
-        self.terminal_print_face_down(-670, -320, 10, "C")
-        self.terminal_print_6509(-500, -320, 100, "P")
-        generator = QSvgGenerator()
-        generator.setFileName("test.svg")
-        generator.setSize(QSize(1000, 1000))
-        # generator.setViewBox(QRect(0, 0, 100, 100))
-        painter = QPainter()
-        painter.begin(generator)
-        self.render(painter)
-        painter.end()
-
-        # self.print_link("C 1", "M 100")
+        self.scene.addItem(Kbk("ss"))
 
     def refresh(self):
         self.scene.update()

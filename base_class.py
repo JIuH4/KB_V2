@@ -114,6 +114,7 @@ class Fasade(Subject):
 
         if name_of_signal == "ALL":
             self.state.selected_signal = 0
+            # self.state.current_links.clear()
             self.state.current_links = self.get_links_by_signal(name_of_signal)
             self.state.selected_links.clear()
             self.notify()
@@ -121,6 +122,7 @@ class Fasade(Subject):
         for i, signal in enumerate(self.state.all_signals):
             if signal == name_of_signal:
                 self.state.selected_signal = i
+                # self.state.current_links.clear()
                 self.state.current_links = self.get_links_by_signal(name_of_signal)
                 self.state.selected_links.clear()
                 self.notify()
