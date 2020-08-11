@@ -261,8 +261,8 @@ class Widget(QWidget, Observer):
         QApplication.quit()
 
     def fill_table(self, state: State):
-        if self.currentState.current_links!=state.current_links:
-        # if False:
+        if self.currentState.current_links != state.current_links:
+            # if False:
             self.table.blockSignals(True)
             self.items_in_table = 0
             self.table.setRowCount(0)
