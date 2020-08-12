@@ -3,8 +3,11 @@ import sys
 import enum
 from kb_nodes import KBK
 from typing import List
-from ui_elements.graph_items.kb_base import Kb_base
+from ui_elements.graph_items.modules import P2569
+from ui_elements.graph_items.krossblocks import Kbk
+from ui_elements.graph_items.module_or_kb_base import module_or_kb_base
 from ui_elements.graph_items.link import LinkState, Link_scheme
+
 from ui_elements.graph_items.node import Node, NodeState
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import QPoint, Qt, QSize, QRect
@@ -14,9 +17,6 @@ from PySide2.QtWidgets import (QApplication, QHBoxLayout,
 from PySide2.QtSvg import *
 
 from Link import Link, DLink
-
-
-
 
 
 class Scheme(QWidget):
@@ -54,89 +54,6 @@ class Scheme(QWidget):
 
 
 
-class Kbk(Kb_base):
-    Type = QtWidgets.QGraphicsItem.UserType + 4
-
-    def __init__(self, name: str, base_y=-100, base_x=-100, size_x=1450, size_y=500, ):
-        Kb_base.__init__(self)
-        self.size_x = size_x
-        self.size_y = size_y
-        self.base_x = base_x
-        self.base_y = base_y
-        self.name = name
-        self.setFlag(QGraphicsItem.ItemIsMovable)
-        self.setCacheMode(self.DeviceCoordinateCache)
-        for m in self.terminals:
-            print(m.pos())
-
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print("1")
-
-    def upd(self, event: QGraphicsSceneMouseEvent):
-        print(event.scenePos())
-
-    def type(self):
-        return Kbk.Type
-
-    def boundingRect(self):
-        return QtCore.QRectF((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
-
-    def paint(self, painter, option, widget):
-        self.terminal_print_face_down(painter, -596, 210, 50, "M", start_number=0, shift=25)
-        self.terminal_print_face_down(painter, 22, 210, 50, "M", start_number=25, shift=25)
-        self.terminal_print_face_down(painter, -596, 110, 50, "M", start_number=100, shift=27)
-        self.terminal_print_face_down(painter, 22, 110, 54, "M", start_number=125, shift=25)
-        self.terminal_print_one_line(painter, -596, -2, 25, "MB2")
-        self.terminal_print_one_line(painter, -596, 22, 25, "MB1")
-        self.terminal_print_one_line(painter, 22, -2, 25, "MB4", tag_direction=1)
-        self.terminal_print_one_line(painter, 22, 22, 25, "MB3", tag_direction=1)
-        self.terminal_print_face_up(painter, -596, -112, 50, "BA2")
-        self.terminal_print_face_up(painter, -596, -212, 50, "BA1")
-        self.terminal_print_face_up(painter, 22, -112, 50, "BA4")
-        self.terminal_print_face_up(painter, 22, -212, 50, "BA3")
-        self.terminal_print_face_up(painter, 638, -112, 8, "K")
-        self.terminal_print_face_up(painter, -709, -112, 8, "K", start_number=8)
-        # self.print_greed(painter)
-        painter.drawRect((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
-        # for m in self.terminals:
-        #     print(m.name)
-
-
-class P2569(Kb_base):
-    Type = QtWidgets.QGraphicsItem.UserType + 5
-
-    def __init__(self, name: str, base_y=-100, base_x=-100, size_x=1208, size_y=90, ):
-        Kb_base.__init__(self)
-        self.size_x = size_x
-        self.size_y = size_y
-        self.base_x = base_x
-        self.base_y = base_y
-        self.name = name
-        self.setFlag(QGraphicsItem.ItemIsMovable)
-        self.setCacheMode(self.DeviceCoordinateCache)
-        for m in self.terminals:
-            print(m.pos())
-
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print("1")
-
-    def upd(self, event: QGraphicsSceneMouseEvent):
-        print(event.scenePos())
-
-    def type(self):
-        return Kbk.Type
-
-    def boundingRect(self):
-        return QtCore.QRectF((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
-
-    def paint(self, painter, option, widget):
-        self.terminal_print_face_up(painter, ((self.size_x // 2) * -1)+16, ((self.size_y // 2) * -1)+41, 100, "CH", start_number=0)
-
-        # self.print_greed(painter)
-        painter.drawRect((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
-
-
-
 class GraphWidget(QGraphicsView):
     def __init__(self):
         QGraphicsView.__init__(self)
@@ -154,9 +71,12 @@ class GraphWidget(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
         self.setBackgroundBrush(QColor("lightgray"))
-
-        self.scene.addItem(Kbk("ss"))
-        self.scene.addItem(P2569("sd"))
+        tmp=Kbk("ss")
+        tmp.setPos(0,0)
+        self.scene.addItem(tmp)
+        tmp=P2569("sd")
+        tmp.setPos(-130,340)
+        self.scene.addItem(tmp)
 
     def refresh(self):
         self.scene.update()
@@ -208,9 +128,6 @@ class GraphWidget(QGraphicsView):
         self.get_node_by_tag(tag1).state = NodeState.used
         self.get_node_by_tag(tag2).state = NodeState.used
         # self.scene.addLine(tag1_pos.x(),tag1_pos.y(),tag2_pos.x(),tag2_pos.y())
-
-
-
 
 
 if __name__ == "__main__":

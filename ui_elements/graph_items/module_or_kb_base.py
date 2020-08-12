@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QGraphicsItem
 from ui_elements.graph_items.node import Node
 
 
-class Kb_base(QGraphicsItem):
+class module_or_kb_base(QGraphicsItem):
     Type = QtWidgets.QGraphicsItem.UserType + 4
 
     def __init__(self):
@@ -19,12 +19,12 @@ class Kb_base(QGraphicsItem):
         painter.drawText(basex - size // 2 - gap, basey - size - gap, name)
 
         for number_in_row in range(0, count // 2):
-            tmp = Node(self, start_number + number_in_row + 1, name, size=size)
+            tmp = Node(self, str(start_number + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * number_in_row, basey)
             tmp.setParentItem(self)
             self.terminals.append(tmp)
         for number_in_row in range(count // 2, count):
-            tmp = Node(self, start_number + shift + number_in_row + 1, name, size=size)
+            tmp = Node(self, str(start_number + shift + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * (number_in_row - count // 2), basey + size + gap)
             tmp.setParentItem(self)
             self.terminals.append(tmp)
@@ -34,12 +34,12 @@ class Kb_base(QGraphicsItem):
         painter.drawText(basex - size // 2 - gap, basey - size - gap, name)
 
         for number_in_row in range(0, count // 2):
-            tmp = Node(self, start_number + number_in_row + 1, name, size=size)
+            tmp = Node(self, str(start_number + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * number_in_row, basey + size + gap)
             tmp.setParentItem(self)
             self.terminals.append(tmp)
         for number_in_row in range(count // 2, count):
-            tmp = Node(self, start_number + shift + number_in_row + 1, name, size=size)
+            tmp = Node(self, str(start_number + shift + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * (number_in_row - count // 2), basey)
             tmp.setParentItem(self)
             self.terminals.append(tmp)
@@ -53,7 +53,7 @@ class Kb_base(QGraphicsItem):
             painter.drawText(basex + (size + gap) * count - 5, basey - size // 2 + 10, name)
 
         for number_in_row in range(0, count):
-            tmp = Node(self, start_number + number_in_row + 1, name, size=size)
+            tmp = Node(self, str(start_number + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * number_in_row, basey)
             tmp.setParentItem(self)
             self.terminals.append(tmp)

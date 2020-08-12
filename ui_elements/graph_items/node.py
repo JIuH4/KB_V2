@@ -2,8 +2,9 @@ import enum
 
 from PySide2 import QtCore
 from PySide2.QtCore import QPoint
-from PySide2.QtGui import QColor, QFont
+from PySide2.QtGui import QColor, QFont, QFontDatabase
 from PySide2.QtWidgets import QGraphicsSceneMouseEvent, QGraphicsItem
+
 
 class NodeState(enum.Enum):
     normal = 0
@@ -14,22 +15,16 @@ class NodeState(enum.Enum):
 class Node(QGraphicsItem):
     Type = QGraphicsItem.UserType + 1
 
-    def __init__(self, graphWidget, num, name: str, size=22):
+    def __init__(self, graphWidget, name: str, group_name: str, size=22):
         QGraphicsItem.__init__(self)
         self.state = NodeState.normal
         self.size = size
-        self.name = name
-        if isinstance(num, str):
-            self.numstr = num
-            self.num = 9999
-        elif isinstance(num, int):
-            self.numstr = str(num)
-            self.num = num
 
-        if self.numstr[:2] == "GN" or self.numstr == "+5":
-            self.tag = self.numstr
-        else:
-            self.tag = name + " " + self.numstr
+        self.fixedFont = QFont("Monospace")
+        self.fixedFont.setStyleHint(QFont.TypeWriter)
+        self.group_name = group_name
+        self.name = name
+        self.tag = group_name + " " + self.name
         self.color = QColor('light green')
 
         # self.setFlag(QGraphicsItem.ItemIsMovable)
@@ -44,7 +39,6 @@ class Node(QGraphicsItem):
         return Node.Type
 
     def boundingRect(self):
-
         return QtCore.QRectF((self.size // 2) * -1, (self.size // 2) * -1, self.size, self.size)
 
     def paint(self, painter, option, widget):
@@ -59,25 +53,12 @@ class Node(QGraphicsItem):
         painter.drawRect((self.size // 2) * -1, (self.size // 2) * -1, self.size, self.size)
 
         painter.setPen(QColor("black"))
-        painter.setFont(QFont('Verdana', 7))
+        painter.setFont(self.fixedFont)
 
-        if self.num == 9999:
-            if len(self.numstr) >= 4:
-                textpoint = QPoint(-12, 3)
-            elif len(self.numstr) >= 3:
-                textpoint = QPoint(-8, 3)
-            else:
-                textpoint = QPoint(-4, 3)
-            if self.numstr == "GND":
-                textpoint = QPoint(-12, 3)
-            if self.numstr == "+5":
-                textpoint = QPoint(-8, 3)
+        if len(self.name) >= 3:
+            textpoint = QPoint(-11, 3)
+        elif len(self.name) >= 2:
+            textpoint = QPoint(-7, 3)
         else:
-
-            if self.num >= 100:
-                textpoint = QPoint(-11, 3)
-            elif self.num >= 10:
-                textpoint = QPoint(-7, 3)
-            else:
-                textpoint = QPoint(-3, 3)
-        painter.drawText(textpoint, self.numstr)
+            textpoint = QPoint(-4, 3)
+        painter.drawText(textpoint, self.name)
