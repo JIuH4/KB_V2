@@ -21,13 +21,15 @@ class module_or_kb_base(QGraphicsItem):
         for number_in_row in range(0, count // 2):
             tmp = Node(self, str(start_number + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * number_in_row, basey)
-            tmp.setParentItem(self)
             self.terminals.append(tmp)
+            tmp.setParentItem(self)
+
         for number_in_row in range(count // 2, count):
             tmp = Node(self, str(start_number + shift + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * (number_in_row - count // 2), basey + size + gap)
-            tmp.setParentItem(self)
             self.terminals.append(tmp)
+            tmp.setParentItem(self)
+            
 
     def terminal_print_face_down(self, painter, basex, basey, count, name, size=22, gap=2, start_number=0, shift=0):
         painter.setFont(self.font)

@@ -5,11 +5,11 @@ import yaml
 from Link import Link
 
 from ui_elements.table import Table_widget
-from ui_elements.scheme import Scheme
+from temp import Scheme
 
 from events import RemLink, SelectLink, AddLink, SelectSignal
 from base_class import Observer, State, Pxi2568, Pxi2569, Port, Kbk, Pxi6509, Fasade, Base
-
+import time
 import sys
 from PySide2.QtCore import Qt, Slot
 from PySide2.QtGui import QPainter, QColor, QStandardItemModel
@@ -106,6 +106,9 @@ class Widget(QWidget, Observer):
         self.table.itemSelectionChanged.connect(self.on_click)
         self.listwidget.currentItemChanged.connect(self.signal_select)
         self.tempinit()
+        self.window = Scheme()
+        self.window.resize(1600, 900)
+        self.window.move(900, 0)
 
     def tempinit(self):
         # b = Pxi2568(Port.barewire)
@@ -159,6 +162,8 @@ class Widget(QWidget, Observer):
         # print(yaml.dump(self.fasade.base.kblck))
         with open("tmp.yaml", 'r') as file:
             self.fasade.base.kblck = yaml.load(file, Loader=yaml.Loader)
+        for i in self.fasade.base.kblck.modules:
+            print(i)
 
         # print(self.fasade.base.kblck)
         self.fasade.state_reset()
@@ -198,7 +203,15 @@ class Widget(QWidget, Observer):
         self.window.show()
         self.showMinimized()
         if self.window != None:
-            self.window.view.add_links(self.currentState.current_links)
+            print(self.fasade.base.kblck.__class__.__name__)
+            self.window.view.add_module(Kbk("sd"))
+            for i in self.fasade.base.kblck.modules:
+                self.window.view.add_module(i)
+
+            # self.window.view.refresh()
+            # print(self.window.view.modules)
+            # self.window.view.add_links(self.currentState.current_links)
+
             self.window.view.refresh()
 
     @Slot()

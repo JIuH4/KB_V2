@@ -1,10 +1,12 @@
 import math
 import sys
 import enum
+
+from kb_class import Module, Pxi2569, Kbk
 from kb_nodes import KBK
 from typing import List
 from ui_elements.graph_items.modules import P2569
-from ui_elements.graph_items.krossblocks import Kbk
+from ui_elements.graph_items.krossblocks import Kbk as Kbk_gi
 from ui_elements.graph_items.module_or_kb_base import module_or_kb_base
 from ui_elements.graph_items.link import LinkState, Link_scheme
 
@@ -51,15 +53,12 @@ class Scheme(QWidget):
         self.view.refresh()
 
 
-
-
-
 class GraphWidget(QGraphicsView):
     def __init__(self):
         QGraphicsView.__init__(self)
 
         self.timerId = 0
-        self.terminals: List[Node] = []
+        self.modules_gi: List[module_or_kb_base] = []
         self.links: List[Link_scheme] = []
 
         self.scene = QGraphicsScene(self)
@@ -71,12 +70,19 @@ class GraphWidget(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
         self.setBackgroundBrush(QColor("lightgray"))
-        tmp=Kbk("ss")
-        tmp.setPos(0,0)
-        self.scene.addItem(tmp)
-        tmp=P2569("sd")
-        tmp.setPos(-130,340)
-        self.scene.addItem(tmp)
+
+    def add_module(self, module):
+        if isinstance(module, Kbk):
+            tmp = Kbk_gi("ss")
+            tmp.setPos(0, 0)
+            self.modules_gi.append(tmp)
+            self.scene.addItem(tmp)
+        if isinstance(module, Pxi2569):
+            tmp = P2569("ss")
+            tmp.setPos(-130, 340)
+            self.modules_gi.append(tmp)
+            self.scene.addItem(tmp)
+            self.modules_gi.append(tmp)
 
     def refresh(self):
         self.scene.update()
@@ -87,15 +93,17 @@ class GraphWidget(QGraphicsView):
         self.links.clear()
 
     def add_links(self, list_of_links: List[Link]):
-        for nod in self.terminals:
-            nod.state = NodeState.normal
+        for module in self.modules_gi:
+            for nod in module.terminals:
+                nod.state = NodeState.normal
         self.clear_links()
         for link in list_of_links:
             self.print_link(link.node1, link.node2)
 
     def highlight_links(self, list_of_links: List[Link]):
-        for nod in self.terminals:
-            nod.state = NodeState.normal
+        for module in self.modules_gi:
+            for nod in module.terminals:
+                nod.state = NodeState.normal
         for printed_link in self.links:
             printed_link.state = LinkState.normal
 
@@ -111,17 +119,16 @@ class GraphWidget(QGraphicsView):
         self.refresh()
 
     def get_node_by_tag(self, tag):
-        for node in self.terminals:
-            if node.tag == tag:
-                return node
+        for module in self.modules_gi:
+            for node in module.terminals:
+                if node.tag == tag:
+                    return node
+        return None
 
     def print_link(self, tag1, tag2):
         # print(f"{tag1}   {tag2}")
-        for node in self.terminals:
-            if node.tag == tag1:
-                tag1_pos = node.pos()
-            if node.tag == tag2:
-                tag2_pos = node.pos()
+        tag1_pos = self.get_node_by_tag(tag1).pos()
+        tag2_pos = self.get_node_by_tag(tag2).pos()
         # print(f"{tag1_pos}   {tag2_pos}")
         self.links.append(Link_scheme(tag1_pos.x(), tag1_pos.y(), tag2_pos.x(), tag2_pos.y(), tag1, tag2))
         self.scene.addItem(self.links[-1])
