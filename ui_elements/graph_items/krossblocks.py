@@ -1,20 +1,25 @@
+import typing
 from PySide2 import QtWidgets, QtCore
 from PySide2.QtWidgets import QGraphicsSceneMouseEvent, QGraphicsItem
 
 from ui_elements.graph_items.module_or_kb_base import module_or_kb_base
 
 
+
+
 class Kbk(module_or_kb_base):
     Type = QtWidgets.QGraphicsItem.UserType + 4
 
-    def __init__(self, name: str, base_y=-100, base_x=-100, size_x=1450, size_y=500, ):
-        module_or_kb_base.__init__(self)
+    def __init__(self, parent, base_y=-100, base_x=-100, size_x=1450, size_y=500, ):
+        module_or_kb_base.__init__(self,parent)
+        print(self.parentWidget().__class__.__name__)
         self.size_x = size_x
         self.size_y = size_y
         self.base_x = base_x
         self.base_y = base_y
-        self.name = name
+        # self.name = name
         self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges)
         self.setCacheMode(self.DeviceCoordinateCache)
         for m in self.terminals:
             print(m.pos())
@@ -27,6 +32,16 @@ class Kbk(module_or_kb_base):
 
     def type(self):
         return Kbk.Type
+
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemPositionChange:
+           print(self.parent.__class__.__name__)
+        self.parent.event_from_widget()
+        self.update()
+
+        return QtWidgets.QGraphicsItem.itemChange(self, change, value)
+
 
     def boundingRect(self):
         return QtCore.QRectF((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
@@ -48,5 +63,6 @@ class Kbk(module_or_kb_base):
         self.terminal_print_face_up(painter, -709, -112, 8, "K", start_number=8)
         # self.print_greed(painter)
         painter.drawRect((self.size_x // 2) * -1, (self.size_y // 2) * -1, self.size_x, self.size_y)
+        # print(self.parent.__class__.__name__)
         # for m in self.terminals:
         #     print(m.name)

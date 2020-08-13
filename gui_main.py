@@ -1,22 +1,25 @@
 import copy
+import sys
+from abc import ABC
 
 import PySide2
 import yaml
-from Link import Link
-
-from ui_elements.table import Table_widget
-from temp import Scheme
-
-from events import RemLink, SelectLink, AddLink, SelectSignal
-from base_class import Observer, State, Pxi2568, Pxi2569, Port, Kbk, Pxi6509, Fasade, Base
-import time
-import sys
 from PySide2.QtCore import Qt, Slot
 from PySide2.QtGui import QPainter, QColor, QStandardItemModel
 from PySide2.QtWidgets import (QAction, QApplication, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidgetItem,
                                QWidget, QCompleter, QListWidget, QGridLayout,
                                QSizePolicy, QTableView, QHeaderView, QListView)
+
+from base_class import Observer, State, Kbk, Fasade, Base
+from events import RemLink, SelectLink, AddLink, SelectSignal
+from temp import Scheme
+from ui_elements.table import Table_widget
+
+
+class Observer_for_widgets:
+    def event_from_widget(self, Event_from_widget):
+        pass
 
 
 class Widget(QWidget, Observer):
@@ -106,60 +109,10 @@ class Widget(QWidget, Observer):
         self.table.itemSelectionChanged.connect(self.on_click)
         self.listwidget.currentItemChanged.connect(self.signal_select)
         self.tempinit()
-        self.window = Scheme()
-        self.window.resize(1600, 900)
-        self.window.move(900, 0)
+
 
     def tempinit(self):
-        # b = Pxi2568(Port.barewire)
-        # b2 = Pxi2569(Port.m1_50)
-        # k = Kbk("ds")
-        # k.add_module(b)
-        # k.add_module(b2)
-        # k.add_module(Pxi2568(Port.m51_100))
-        # k.add_module(Pxi2569(Port.m1_50))
-        # k.add_module(Pxi6509(Port.m101_150))
-        # # k.remove_module(Pxi2568(Port.m51_100))
-        #
-        # k.add_link(Link("M 51", "M 2", "s2"))
-        # k.add_link(Link("M 51", "M 2", "s2"))
-        # k.add_link(Link("M 51", "M 2", "s2"))
-        # k.add_link(Link("M 51", "K 2", "s2"))
-        # k.add_link(Link("M 56", "M 2", "s2"))
-        #
-        # k.add_link(Link("M 21", "M 2", "s2"))
-        # k.add_link(Link("M 51", "K 1", "s2"))
-        # k.add_link(Link("M 1", "M 62", "s3"))
-        # k.add_link(Link("M 1", "M 63", "s3"))
-        # k.add_link(Link("M 1", "M 65", "s3"))
-        # self.fasade.base.kblck = k
-        # self.fasade.state_reset()
-        # print(self.fasade.select_signal("s3"))
-        # # self.fasade.select_links([6, 1])
-        # self.fasade.base.kblck.rem_link(self.fasade.state.current_links[2])
-        # print(self.fasade.state.selected_links)
-        # self.fasade.state_reset()
-        # print(self.fasade.state.current_links)
-        # print(self.fasade.state.selected_signal)
-        # print(self.fasade.state.selected_links)
-        # self.fasade.dispatch_event(events.AddLink("M 10", "M 65", "s5"))
-        # self.fasade.dispatch_event(events.Event())
-        # print(self.fasade.state.all_signals)
-        #
-        # self.fasade.base.kblck = k
-        # self.fasade.state_reset()
-        #
-        # # self.fasade.select_links([6, 1])
-        #
-        # print(self.fasade.state.selected_links)
-        # self.fasade.state_reset()
-        # print(self.fasade.state.current_links)
-        # print(self.fasade.state.selected_signal)
-        # print(self.fasade.state.selected_links)
-        # self.fasade.dispatch_event(events.AddLink("M 10", "M 65", "s5"))
-        # self.fasade.dispatch_event(events.Event())
-        # print(self.fasade.state.all_signals)
-        # print(yaml.dump(self.fasade.base.kblck))
+
         with open("tmp.yaml", 'r') as file:
             self.fasade.base.kblck = yaml.load(file, Loader=yaml.Loader)
         for i in self.fasade.base.kblck.modules:
@@ -170,7 +123,15 @@ class Widget(QWidget, Observer):
         self.fasade.notify()
         # QMainWindow using QWidget as central widget
 
-    def update2(self, state: State):
+    def event_from_scheme(self):
+        print("sdds")
+
+        self.window.view.clear_links()
+        self.window.view.refresh()
+
+        # self.window.view.refresh()
+
+    def update_state(self, state: State):
         self.fill_table(state)
         self.fill_list(state)
         self.currentState = copy.deepcopy(state)
@@ -196,21 +157,22 @@ class Widget(QWidget, Observer):
     @Slot()
     def scheme(self):
         # print("sasd")
-        self.window = Scheme()
+        self.window = Scheme(self)
+        # self.window.setParent(self)
         self.window.resize(1600, 900)
         self.window.move(900, 0)
 
         self.window.show()
         self.showMinimized()
         if self.window != None:
-            print(self.fasade.base.kblck.__class__.__name__)
-            self.window.view.add_module(Kbk("sd"))
+            # print(self.fasade.base.kblck.__class__.__name__)
+            self.window.view.add_module(self.fasade.base.kblck)
             for i in self.fasade.base.kblck.modules:
                 self.window.view.add_module(i)
 
             # self.window.view.refresh()
             # print(self.window.view.modules)
-            # self.window.view.add_links(self.currentState.current_links)
+
 
             self.window.view.refresh()
 
@@ -345,46 +307,10 @@ class MainWindow(QMainWindow):
 
     # @Slot()
     # def Load_app(self, checked):
-    #     self.centralWidget().listwidget.clear()
-    #     fname = QFileDialog.getOpenFileName(self, 'Open file')[0]
-    #     # b = Base(KBK)
-    #     b.load_json(fname)
-    #     # self.centralWidget().listwidget.clear()
-    #     self.centralWidget().refresh()
-    #     self.centralWidget().signal_select()
-    #
-    #     # self.centralWidget().refresh()
-    #
-    # def Edge_check(self, edge):
-    #     if edge[:2] != "CH" and edge[0] != "P" and edge[:2] != "GN" and edge[:2] != "+5":
-    #         return True
-    #     else:
-    #         return False
 
     @Slot()
     def Save_table(self):
         pass
-        # tmp = []
-        # for link in b.links:
-        #     if self.Edge_check(link.node1) and self.Edge_check(link.node2):
-        #         tmp.append([link.node1, link.node2])
-        # G = nx.Graph()
-        # G.add_edges_from(tmp)
-        #
-        # n = nx.to_numpy_matrix(G, dtype="intc")
-        # numpy.set_printoptions(threshold=sys.maxsize)
-        #
-        # df = pd.DataFrame(data=n, index=G.nodes, columns=G.nodes)
-        # df2 = pd.DataFrame(data=tmp, index=range(
-        #     1, len(tmp) + 1), columns=["Node1", "Node2"])
-        # # print(df2)
-        # # print(n)
-        # # df.style.apply(highlight_greaterthan_1,axis=1)
-        #
-        # df.to_excel('MS.xlsx')
-        # df2.to_excel('EL.xlsx')
-        # # plt.show()
-        # # self.centralWidget().refresh()
 
     @Slot()
     def Save_app(self, checked):

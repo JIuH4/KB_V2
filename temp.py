@@ -1,6 +1,7 @@
 import math
 import sys
 import enum
+from abc import ABC, abstractmethod
 
 from kb_class import Module, Pxi2569, Kbk
 from kb_nodes import KBK
@@ -9,6 +10,7 @@ from ui_elements.graph_items.modules import P2569
 from ui_elements.graph_items.krossblocks import Kbk as Kbk_gi
 from ui_elements.graph_items.module_or_kb_base import module_or_kb_base
 from ui_elements.graph_items.link import LinkState, Link_scheme
+from events import RemLink, SelectLink, AddLink, SelectSignal
 
 from ui_elements.graph_items.node import Node, NodeState
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -21,14 +23,37 @@ from PySide2.QtSvg import *
 from Link import Link, DLink
 
 
+class Observer_for_widgets:
+    def event_from_widget(self, Event_from_widget):
+        pass
+
+
+
+class Subject(ABC):
+
+    @abstractmethod
+    def attach(self, observer: Observer_for_widgets) -> None:
+        pass
+
+    @abstractmethod
+    def detach(self, observer: Observer_for_widgets) -> None:
+        pass
+
+    @abstractmethod
+    def notify(self) -> None:
+        pass
+
+
 class Scheme(QWidget):
-    def __init__(self):
+    def __init__(self,parent):
         super().__init__()
         self.layt = QHBoxLayout()
-        self.view = GraphWidget()
+        self.view = GraphWidget(parent)
         self.layt.addWidget(self.view)
         self.setWindowTitle("Схема")
         self.setLayout(self.layt)
+        # print(self.parent())
+        # print("ss")
 
     def wheelEvent(self, event):
         numDegrees = event.delta() / 8
@@ -53,11 +78,12 @@ class Scheme(QWidget):
         self.view.refresh()
 
 
-class GraphWidget(QGraphicsView):
-    def __init__(self):
+class GraphWidget(QGraphicsView, Observer_for_widgets):
+    def __init__(self,parent):
         QGraphicsView.__init__(self)
 
         self.timerId = 0
+        self.parent=parent
         self.modules_gi: List[module_or_kb_base] = []
         self.links: List[Link_scheme] = []
 
@@ -70,19 +96,25 @@ class GraphWidget(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
         self.setBackgroundBrush(QColor("lightgray"))
+        # self.parent.event_from_scheme()
+
+
+    def event_from_widget(self):
+        self.parent.event_from_scheme()
 
     def add_module(self, module):
         if isinstance(module, Kbk):
-            tmp = Kbk_gi("ss")
+            tmp = Kbk_gi(self)
             tmp.setPos(0, 0)
             self.modules_gi.append(tmp)
             self.scene.addItem(tmp)
+            # print(tmp.parentObject())
+
         if isinstance(module, Pxi2569):
-            tmp = P2569("ss")
+            tmp = P2569(self)
             tmp.setPos(-130, 340)
             self.modules_gi.append(tmp)
             self.scene.addItem(tmp)
-            self.modules_gi.append(tmp)
 
     def refresh(self):
         self.scene.update()
@@ -98,7 +130,10 @@ class GraphWidget(QGraphicsView):
                 nod.state = NodeState.normal
         self.clear_links()
         for link in list_of_links:
-            self.print_link(link.node1, link.node2)
+            try:
+                self.print_link(link.node1, link.node2)
+            except:
+                pass
 
     def highlight_links(self, list_of_links: List[Link]):
         for module in self.modules_gi:

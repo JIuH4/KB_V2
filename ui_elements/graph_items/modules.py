@@ -6,13 +6,13 @@ from ui_elements.graph_items.module_or_kb_base import module_or_kb_base
 class P2569(module_or_kb_base):
     Type = QtWidgets.QGraphicsItem.UserType + 5
 
-    def __init__(self, name: str, base_y=-100, base_x=-100, size_x=1208, size_y=90, ):
-        module_or_kb_base.__init__(self)
+    def __init__(self, parent, base_y=-100, base_x=-100, size_x=1208, size_y=90, ):
+        module_or_kb_base.__init__(self,parent)
         self.size_x = size_x
         self.size_y = size_y
         self.base_x = base_x
         self.base_y = base_y
-        self.name = name
+        # self.name = name
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setCacheMode(self.DeviceCoordinateCache)
         for m in self.terminals:

@@ -8,9 +8,10 @@ from ui_elements.graph_items.node import Node
 class module_or_kb_base(QGraphicsItem):
     Type = QtWidgets.QGraphicsItem.UserType + 4
 
-    def __init__(self):
+    def __init__(self, parent):
         QGraphicsItem.__init__(self)
         self.terminals = []
+        self.parent = parent
         self.font = QFont()
         self.font.setPixelSize(16)
 
@@ -29,7 +30,6 @@ class module_or_kb_base(QGraphicsItem):
             tmp.setPos(basex + (size + gap) * (number_in_row - count // 2), basey + size + gap)
             self.terminals.append(tmp)
             tmp.setParentItem(self)
-            
 
     def terminal_print_face_down(self, painter, basex, basey, count, name, size=22, gap=2, start_number=0, shift=0):
         painter.setFont(self.font)
@@ -67,3 +67,4 @@ class module_or_kb_base(QGraphicsItem):
             painter.drawLine(x, -400, x, 400, )
         for y in range(-400, 400, 10):
             painter.drawLine(-800, y, 800, y, )
+

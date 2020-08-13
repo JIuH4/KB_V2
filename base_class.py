@@ -24,7 +24,7 @@ class State:
 
 class Observer:
 
-    def update2(self, state: State) -> None:
+    def update_state(self, state: State) -> None:
         pass
 
 
@@ -67,7 +67,7 @@ class Fasade(Subject):
     def notify(self):
         print("Subject: Notifying observers...")
         for observer in self._observers:
-            observer.update2(self.state)
+            observer.update_state(self.state)
 
     def dispatch_event(self, event: Event):
         if isinstance(event, AddLink):
@@ -159,7 +159,7 @@ class Fasade(Subject):
 
 
 class VSS(Observer):
-    def update2(self, state: State):
+    def update_state(self, state: State):
         print(state.all_signals)
 
 
