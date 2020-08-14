@@ -16,7 +16,7 @@ class module_or_kb_base(QGraphicsItem):
         self.font.setPixelSize(16)
 
     def terminal_print_face_up(self, painter, basex, basey, count, name, size=22, gap=2, start_number=0, shift=0):
-        painter.setFont(self.font)
+        # painter.setFont(self.font)
         painter.drawText(basex - size // 2 - gap, basey - size - gap, name)
 
         for number_in_row in range(0, count // 2):
