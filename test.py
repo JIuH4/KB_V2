@@ -3,7 +3,9 @@ import weakref
 import math
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import QPoint
-from ui_elements.graph_items.module_or_kb_base import module_or_kb_base
+from PySide2.QtWidgets import QGraphicsItem
+
+from ui_elements.graph_items.module_or_kb_base import module_or_kb_base, Base_for_module
 
 
 class Edge(QtWidgets.QGraphicsItem):
@@ -16,10 +18,11 @@ class Edge(QtWidgets.QGraphicsItem):
         self.sourcePoint = QtCore.QPointF()
         self.destPoint = QtCore.QPointF()
         self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
+        self.setCacheMode(self.DeviceCoordinateCache)
         self.source = weakref.ref(sourceNode)
         self.dest = weakref.ref(destNode)
-        self.source().addEdge(self)
-        self.dest().addEdge(self)
+        # self.source().addEdge(self)
+        # self.dest().addEdge(self)
         self.adjust()
 
     def type(self):
@@ -77,13 +80,13 @@ class Edge(QtWidgets.QGraphicsItem):
         painter.setBrush(QtCore.Qt.black)
 
 
-class Node_new(module_or_kb_base):
+class Node_new(Base_for_module):
     Type = QtWidgets.QGraphicsItem.UserType + 1
 
-    def __init__(self, graphWidget, width=500, height=200):
-        QtWidgets.QGraphicsItem.__init__(self)
+    def __init__(self, graphWidget, width=1450, height=500):
+        super(Node_new, self).__init__()
         self.size_x = width
-        self.terminals = []
+        self.terminals :QGraphicsItem = []
         self.size_y = height
         self.graph = weakref.ref(graphWidget)
         self.edgeList = []
@@ -92,6 +95,21 @@ class Node_new(module_or_kb_base):
         self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges)
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
+        self.terminal_print_face_down( -596, 210, 50, "M", start_number=0, shift=25)
+        self.terminal_print_face_down( 22, 210, 50, "M", start_number=25, shift=25)
+        self.terminal_print_face_down( -596, 110, 50, "M", start_number=100, shift=27)
+        self.terminal_print_face_down( 22, 110, 54, "M", start_number=125, shift=25)
+        self.terminal_print_one_line( -596, -2, 25, "MB2")
+        self.terminal_print_one_line( -596, 22, 25, "MB1")
+        self.terminal_print_one_line( 22, -2, 25, "MB4", tag_direction=1)
+        self.terminal_print_one_line( 22, 22, 25, "MB3", tag_direction=1)
+        self.terminal_print_face_up( -596, -112, 50, "BA2")
+        self.terminal_print_face_up(-596, -212, 50, "BA1")
+        self.terminal_print_face_up( 22, -112, 50, "BA4")
+        self.terminal_print_face_up( 22, -212, 50, "BA3")
+        self.terminal_print_face_up( 638, -112, 8, "K")
+        self.terminal_print_face_up( -709, -112, 8, "K", start_number=8)
+        # print(self.terminals[1].scenePos())
 
     def type(self):
         return Node_new.Type
@@ -115,21 +133,21 @@ class Node_new(module_or_kb_base):
 
     def paint(self, painter, option, widget):
 
-        # painter.setBrush(QtCore.Qt.darkGray)
+        painter.setBrush(QtCore.Qt.lightGray)
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 0))
         painter.drawRect(-1 * (self.size_x // 2), -1 * (self.size_y // 2),
                          self.size_x, self.size_y)
 
-        painter.setPen(QtGui.QPen(QtCore.Qt.black, 0))
-        painter.drawRect(-1 * (self.size_x // 4), -1 * (self.size_y // 4),
-                         self.size_x // 2, self.size_y // 2)
-        self.terminal_print_face_up(painter,0,0,10,"ds")
+
+        super().paint( painter, option, widget)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionChange:
             for edge in self.edgeList:
                 edge().adjust()
             self.graph().itemMoved()
+            # if len(self.terminals)>0:
+            # print(self.terminals[1].scenePos())
 
         return QtWidgets.QGraphicsItem.itemChange(self, change, value)
 
@@ -142,13 +160,14 @@ class Node_new(module_or_kb_base):
         QtWidgets.QGraphicsItem.mouseReleaseEvent(self, event)
 
 
+
 class GraphWidget(QtWidgets.QGraphicsView):
     def __init__(self):
         QtWidgets.QGraphicsView.__init__(self)
 
         self.timerId = 0
         height = 900
-        width = 1300
+        width = 1600
 
         scene = QtWidgets.QGraphicsScene(self)
         scene.setItemIndexMethod(QtWidgets.QGraphicsScene.NoIndex)
@@ -159,22 +178,23 @@ class GraphWidget(QtWidgets.QGraphicsView):
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
 
-        node1 = Node_new(self)
-        node2 = Node_new(self)
+        # node1 = Node_new(self)
+        # node2 = Node_new(self)
 
         self.centerNode = Node_new(self)
 
-        scene.addItem(node1)
-        scene.addItem(node2)
+        # scene.addItem(node1)
+        # scene.addItem(node2)
 
         scene.addItem(self.centerNode)
-
-        scene.addItem(Edge(node1, node2))
-
-        scene.addItem(Edge(node2, self.centerNode))
-
-        node1.setPos(-width // 3, -height // 3)
-        node2.setPos(250, -250)
+        tmp=Edge(self.centerNode.terminals[0], self.centerNode.terminals[10])
+        scene.addItem(tmp)
+        self.centerNode.addEdge(tmp)
+        #
+        # scene.addItem(Edge(node2, self.centerNode))
+        #
+        # node1.setPos(-width // 3, -height // 3)
+        # node2.setPos(250, -250)
 
         self.centerNode.setPos(0, 0)
 

@@ -33,7 +33,8 @@ class Node(QGraphicsItem):
         self.setZValue(-1)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        self.parentItem().upd(event)
+        self.state=NodeState.highlight
+        self.update()
 
     def type(self):
         return Node.Type
