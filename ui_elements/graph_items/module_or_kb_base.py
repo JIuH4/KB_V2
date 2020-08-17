@@ -92,10 +92,14 @@ class Base_for_module(QGraphicsItem):
     def __init__(self):
         QGraphicsItem.__init__(self)
         self.terminals = []
+        self.terminals_dict = {}
         self.texts = []
 
         self.font = QFont()
         self.font.setPixelSize(16)
+
+    def get_terminal(self, terminal: str):
+        return self.terminals_dict.get(terminal, None)
 
     def terminal_print_face_up(self, basex, basey, count, name, size=22, gap=2, start_number=0, shift=0):
         caption = QGraphicsSimpleTextItem()
@@ -107,11 +111,13 @@ class Base_for_module(QGraphicsItem):
             tmp = Node(self, str(start_number + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * number_in_row, basey)
             self.terminals.append(tmp)
+            self.terminals_dict[name + " " + str(start_number + number_in_row + 1)] = tmp
 
         for number_in_row in range(count // 2, count):
             tmp = Node(self, str(start_number + shift + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * (number_in_row - count // 2), basey + size + gap)
             self.terminals.append(tmp)
+            self.terminals_dict[name + " " + str(start_number + shift + number_in_row + 1)] = tmp
 
     def terminal_print_face_down(self, basex, basey, count, name, size=22, gap=2, start_number=0, shift=0):
         caption = QGraphicsSimpleTextItem()
@@ -124,13 +130,14 @@ class Base_for_module(QGraphicsItem):
             tmp = Node(self, str(start_number + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * number_in_row, basey + size + gap)
             tmp.setParentItem(self)
-
+            self.terminals_dict[name + " " + str(start_number + number_in_row + 1)] = tmp
         for number_in_row in range(count // 2, count):
             tmp = Node(self, str(start_number + shift + number_in_row + 1), name, size=size)
             tmp.setPos(basex + (size + gap) * (number_in_row - count // 2), basey)
             tmp.setParentItem(self)
+            self.terminals_dict[name + " " + str(start_number + shift + number_in_row + 1)] = tmp
 
-    def terminal_print_one_line(self,  basex, basey, count, name, size=22, gap=2, start_number=0,
+    def terminal_print_one_line(self, basex, basey, count, name, size=22, gap=2, start_number=0,
                                 tag_direction=0):
 
         if tag_direction == 0:
@@ -153,13 +160,14 @@ class Base_for_module(QGraphicsItem):
             tmp.setPos(basex + (size + gap) * number_in_row, basey)
             tmp.setParentItem(self)
             self.terminals.append(tmp)
+            self.terminals_dict[name + " " + str(start_number + number_in_row + 1)] = tmp
 
-    def paint(self, painter, option, widget):
-        for nd in self.terminals:
-            nd.setParentItem(self)
-
-        for tx in self.texts:
-            tx.setParentItem(self)
+    # def paint(self, painter, option, widget):
+    #     for nd in self.terminals:
+    #         nd.setParentItem(self)
+    #
+    #     for tx in self.texts:
+    #         tx.setParentItem(self)
 
     def print_greed(self, painter):
         painter.drawLine(0, -400, 0, 400, )

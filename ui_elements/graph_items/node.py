@@ -29,12 +29,27 @@ class Node(QGraphicsItem):
 
         # self.setFlag(QGraphicsItem.ItemIsMovable)
         # self.setFlag(QGraphicsItem.ItemIsSelectable)
-        # self.setCacheMode(self.DeviceCoordinateCache)
+        self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        self.state=NodeState.highlight
-        self.update()
+        # self.state=NodeState.highlight
+        print(self.state)
+        # self.color = QColor('cyan')
+    #     self.adjust()
+    #     self.update()
+    #
+    # def adjust(self):
+    #     if self.state != NodeState.highlight:
+    #         print("sd")
+    #     if self.state == NodeState.normal:
+    #         self.color = QColor('light green')
+    #     elif self.state == NodeState.used:
+    #         self.color = QColor('yellow')
+    #     elif self.state == NodeState.highlight:
+    #         self.color = QColor('cyan')
+    #         print(("Ss"))
+
 
     def type(self):
         return Node.Type
